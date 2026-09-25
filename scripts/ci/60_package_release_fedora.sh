@@ -62,8 +62,7 @@ ${EL2_RELEASE_BLOCK}
 
 ## First Boot
 
-- No account is shipped. GNOME initial setup asks for your name, password and
-  language on first boot, as on a stock Fedora install.
+- No account is shipped. Plasma Setup creates the first account on first boot.
 ${EL2_PAYLOAD_BLOCK}
 EOF
 else
@@ -93,8 +92,7 @@ ${EL2_RELEASE_BLOCK}
 
 ## First Boot
 
-- No account is shipped. GNOME initial setup asks for your name, password and
-  language on first boot, as on a stock Fedora install.
+- No account is shipped. Plasma Setup creates the first account on first boot.
 
 ${EL2_PAYLOAD_BLOCK}
 

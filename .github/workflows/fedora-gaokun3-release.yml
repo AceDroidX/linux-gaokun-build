@@ -15,15 +15,15 @@ on:
       desktop_environment:
         description: Desktop environment packages or groups (space-separated)
         required: true
-        default: "@gnome-desktop @workstation-product"
+        default: "@kde-desktop"
       excluded_packages:
         description: Packages to exclude from rootfs install (comma-separated)
         required: true
-        default: "gnome-boxes,gnome-connections,snapshot,gnome-weather,gnome-contacts,gnome-maps,simple-scan,gnome-clocks,gnome-calculator,gnome-calendar,amd-gpu-firmware,intel-gpu-firmware,linux-firmware,nvidia-gpu-firmware,toolbox,unoconv,mediawriter"
+        default: "amd-gpu-firmware,intel-gpu-firmware,linux-firmware,nvidia-gpu-firmware,toolbox,unoconv,mediawriter"
       extra_packages:
         description: Extra packages to install (space-separated)
         required: true
-        default: "fcitx5-chinese-addons gnome-tweaks gnome-extensions-app telnet mpv v4l-utils vim nano ripgrep git htop fastfetch screen firefox"
+        default: "fcitx5-chinese-addons fcitx5-configtool telnet mpv v4l-utils vim nano ripgrep git htop fastfetch screen firefox"
       build_el2:
         description: Build and include optional -gaokun3-el2 kernel and EL2 EFI payloads
         required: true
@@ -226,7 +226,8 @@ jobs:
             @core @standard ${{ inputs.desktop_environment }}
             systemd-boot-unsigned alsa-ucm policycoreutils selinux-policy-targeted
             NetworkManager NetworkManager-wifi NetworkManager-tui openssh-server
-            gdm gnome-initial-setup glibc-langpack-en langpacks-en langpacks-zh_CN binutils
+            fedora-release-kde-desktop plasma-login-manager plasma-setup
+            glibc-langpack-en langpacks-en langpacks-zh_CN binutils
             google-noto-color-emoji-fonts google-noto-emoji-fonts
             alsa-utils pipewire-utils
           INSTALL_LANGS: all

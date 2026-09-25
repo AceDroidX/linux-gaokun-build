@@ -36,6 +36,7 @@ install_module_config() {
 install_common_image_assets() {
   local rootfs_dir="$1"
   local gaokun_dir="$2"
+  local desktop="${3:-gnome}"
   local executable_assets=(
     "tools/bluetooth/patch-nvm-bdaddr.py:/usr/local/bin/patch-nvm-bdaddr.py"
     "tools/touchscreen-tuner/touchscreen-tune:/usr/local/bin/touchscreen-tune"
@@ -50,12 +51,6 @@ install_common_image_assets() {
     "tools/touchscreen-tuner/tune.py:/usr/local/lib/gaokun-touchscreen-tuner/tune.py"
     "tools/touchscreen-tuner/tune-icon.svg:/usr/local/lib/gaokun-touchscreen-tuner/tune-icon.svg"
     "tools/touchscreen-tuner/touchscreen-tune.desktop:/usr/share/applications/touchscreen-tune.desktop"
-    # The panel is portrait and has to be rotated before anyone has logged in.
-    # mutter reads this system-level file in every session, so it covers the
-    # first-boot setup screen and the login screen, which run as their own users,
-    # as well as accounts created later. A user changing rotation in Settings
-    # writes ~/.config/monitors.xml, which takes precedence.
-    "tools/image-assets/etc/xdg/monitors.xml:/etc/xdg/monitors.xml"
   )
   local asset src dest
 
@@ -70,6 +65,22 @@ install_common_image_assets() {
     "$rootfs_dir/usr/share/applications"
 
   install_module_config "$rootfs_dir" "$gaokun_dir" desktop
+
+  case "$desktop" in
+    gnome)
+      # Mutter reads this before login; personal monitor settings take priority.
+      data_assets+=("tools/image-assets/etc/xdg/monitors.xml:/etc/xdg/monitors.xml")
+      ;;
+    kde)
+      # KWin loads this through XDG_CONFIG_DIRS for the greeter, first-run
+      # setup and new users. Personal display settings take priority.
+      data_assets+=("tools/image-assets/etc/xdg/kwinoutputconfig.json:/etc/xdg/kwinoutputconfig.json")
+      ;;
+    *)
+      echo "unknown image desktop: $desktop" >&2
+      return 1
+      ;;
+  esac
 
   for asset in "${executable_assets[@]}"; do
     src="${asset%%:*}"
