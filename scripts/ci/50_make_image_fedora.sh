@@ -55,7 +55,7 @@ sudo mount "${LOOP}p1" "$MNT/boot/efi"
 sudo rsync -aHAX --numeric-ids --exclude="/proc/*" --exclude="/sys/*" --exclude="/dev/*" --exclude="/run/*" "$ROOTFS_DIR/" "$MNT/"
 sudo chown root:root "$MNT"
 sudo chmod 0755 "$MNT"
-install_common_image_assets "$MNT" "$GAOKUN_DIR"
+install_common_image_assets "$MNT" "$GAOKUN_DIR" kde
 
 sudo tee "$MNT/etc/fstab" >/dev/null <<EOF
 UUID=${ROOT_UUID}  /         ext4   errors=remount-ro,noatime  0  1
@@ -71,9 +71,7 @@ sudo mount -t tmpfs tmpfs "$MNT/run"
 sudo chroot "$MNT" /usr/bin/env KREL="$KREL" KREL_EL2="$KREL_EL2" BUILD_EL2="$BUILD_EL2" ROOT_UUID="$ROOT_UUID" /bin/bash -euxo pipefail <<'CHROOT_EOF'
 echo "fedora" > /etc/hostname
 
-# No account is created here. gdm runs gnome-initial-setup when no regular user
-# exists, so the first boot asks for a name and password the way stock Fedora
-# does, instead of shipping a known one.
+# No regular account is shipped. Plasma Setup creates the first account on boot.
 
 # dnf must not remove the only kernel that can boot this device:
 # protect_running_kernel matches Fedora's package names, not ours.
@@ -87,20 +85,14 @@ EOF
 cat >> /etc/dnf/dnf.conf <<'EOF'
 excludepkgs=kernel,kernel-core,kernel-modules,kernel-modules-core
 EOF
-# Fedora's own image defaults, held until the user picks in Settings. Anything
-# left unset here is asked for on tty1, before gdm, on the first boot.
+# Fedora's own image defaults, held until the user picks in Settings. Plasma
+# Setup handles the first account and the remaining first-run choices.
 systemd-firstboot --locale=en_US.UTF-8 --keymap=us --timezone=UTC
-
-mkdir -p /var/lib/AccountsService/users
-cat > /var/lib/AccountsService/users/gdm <<'EOF'
-[User]
-SystemAccount=true
-EOF
 
 command -v nmcli
 command -v nmtui
-getent passwd gdm
-systemctl enable gdm.service NetworkManager.service sshd.service patch-nvm-bdaddr.service
+systemctl enable --force plasmalogin.service
+systemctl enable plasma-setup.service NetworkManager.service sshd.service patch-nvm-bdaddr.service
 systemctl set-default graphical.target
 
 install -d /etc/kernel
@@ -191,8 +183,9 @@ EOF
 rpm --rebuilddb
 rpm -q --whatprovides "libc.so.6()(64bit)"
 # Catch missing desktop components and boot payloads before compressing an image.
-rpm -q gdm gnome-shell gnome-initial-setup NetworkManager-tui dbus-broker
-systemctl is-enabled gdm.service NetworkManager.service
+rpm -q fedora-release-kde-desktop plasma-desktop plasma-login-manager plasma-setup NetworkManager-tui dbus-broker
+systemctl is-enabled plasmalogin.service plasma-setup.service NetworkManager.service
+test -s /etc/xdg/kwinoutputconfig.json
 for entry in /boot/efi/loader/entries/*.conf; do
   while read -r key payload rest; do
     case "$key" in

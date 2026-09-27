@@ -8,7 +8,7 @@ Build scripts, tools, and firmware for Linux images targeting the Huawei MateBoo
 
 `build.env` pins the kernel SHA and distribution versions. Use `./build.sh kernel|debs|rpms` locally; image assembly currently runs through CI. Drivers, DTS and defconfig belong in the downstream kernel tree.
 
-See [rootfs rework](docs/rootfs-rework.md) for the ext4 layout and Fedora first-boot account setup.
+See [rootfs rework](docs/rootfs-rework.md) for the ext4 layout and Fedora KDE first-boot account setup.
 
 Gaokun3 speakers default to unity digital gain and +18 dB PA gain through the
 in-tree kernel driver and UCM boot configuration. WirePlumber uses software

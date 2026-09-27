@@ -38,7 +38,10 @@ build_variant() {
     "$src_dir"/scripts/config --file "$out_dir/.config" --set-str LOCALVERSION "$localversion"
   fi
 
+  # Needed by NetBIOS name-service broadcast conntrack rules.
+  "$src_dir"/scripts/config --file "$out_dir/.config" --module NF_CONNTRACK_NETBIOS_NS
   make -C "$src_dir" O="$out_dir" ARCH=arm64 CROSS_COMPILE="$CROSS_COMPILE" olddefconfig
+  grep -qx 'CONFIG_NF_CONNTRACK_NETBIOS_NS=m' "$out_dir/.config"
   make -C "$src_dir" O="$out_dir" ARCH=arm64 CROSS_COMPILE="$CROSS_COMPILE" -j"${JOBS:-$(nproc)}" Image modules dtbs
   make -C "$src_dir" O="$out_dir" ARCH=arm64 CROSS_COMPILE="$CROSS_COMPILE" modules_prepare
 }
