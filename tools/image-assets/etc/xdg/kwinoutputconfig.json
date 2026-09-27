@@ -5,7 +5,7 @@
       {
         "connectorName": "DSI-1",
         "scale": 2,
-        "transform": "Rotated90",
+        "transform": "Rotated270",
         "autoRotation": "Never"
       }
     ]
